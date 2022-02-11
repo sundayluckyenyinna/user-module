@@ -1,4 +1,4 @@
-package com.springarr.user.data.personal;
+package com.springarr.user.data;
 
 public class OriginDetails {
 }

@@ -1,18 +1,19 @@
-package com.springarr.user.data.personal;
+package com.springarr.user.data;
 
+import com.springarr.user.abstracts.DataContainer;
+import com.springarr.user.annotation.NoData;
 import com.springarr.user.enums.CaseType;
-import com.springarr.user.utils.DataUtils;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class defines the objects or instances that will represent and hold the data for the name properties
  * of the users of this application.
  */
-public class Name implements Serializable
+public class Name extends DataContainer implements Serializable
 {
     /**
      * The first name attribute for the typical user of the application.
@@ -39,21 +40,34 @@ public class Name implements Serializable
      * A static property that indicates that an attribute is empty. This is avoid the
      * presence of a 'null' value.
      */
+    @NoData
     private final static String NO_VALUE = "NULL";
 
     /**
-     * An instance of the DataUtils object that is responsible for all manipulations
-     * of the properties of the Name object.
-     * */
-    private final DataUtils dataUtils = new DataUtils();
-
+     * Creates an instance of Name with all simple String values initialized to "NULL" string.
+     */
     public Name(){
-        this.lastName = Name.NO_VALUE;
-        this.firstName = Name.NO_VALUE;
+        super();
+    }
+
+    /**
+     * Creates an instance of Name for those users with two names only.
+     * @param lastName : String
+     * @param firstName : String
+     */
+    public Name(String lastName, String firstName){
+        this.lastName = lastName;
+        this.firstName = firstName;
         this.middleName = Name.NO_VALUE;
         this.otherName = Name.NO_VALUE;
     }
 
+    /**
+     * Creates an instance of Name for those users with the conventional number (3) of names.
+     * @param lastName : String
+     * @param firstName : String
+     * @param middleName : String
+     */
     public Name(String lastName, String firstName, String middleName){
         this.lastName = lastName;
         this.firstName = firstName;
@@ -61,6 +75,14 @@ public class Name implements Serializable
         this.otherName = Name.NO_VALUE;
     }
 
+    /**
+     * Creates an instance of Name for those users with the conventional number of names(3)
+     * and any other name.
+     * @param lastName : String
+     * @param firstName : String
+     * @param middleName : String
+     * @param otherName : String
+     */
     public Name(String lastName, String firstName, String middleName, String otherName){
         this.lastName = lastName;
         this.firstName = firstName;
@@ -69,14 +91,27 @@ public class Name implements Serializable
     }
 
     /** GETTERS AND SETTERS OF PROPERTIES */
+
+    /**
+     * Returns the first name for this name object.
+     * @return firstName : String
+     */
     public String getFirstName() {
         return firstName;
     }
 
+    /**
+     * Sets the first name data for this name object to the string value passed as parameter.
+     * @param firstName : String
+     */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
+    /**
+     * Returns the middle name for the name object.
+     * @return middleName : String
+     */
     public String getMiddleName() {
         return middleName;
     }
@@ -101,35 +136,50 @@ public class Name implements Serializable
         this.otherName = otherName;
     }
 
-    /** PRIVATE METHODS */
-
     /**
      * This is a private method that returns the array consisting of the names of the user.
      * @return String[] nameArray.
      */
     private String[] getNameArray(){
-        if (this.otherName.equalsIgnoreCase(Name.NO_VALUE))
-            return new String[]{this.firstName, this.middleName, this.lastName};
-        return new String[]{this.firstName, this.middleName, this.lastName, this.otherName};
+        return this.getNameList().toArray(new String[0]);
+    }
+
+    private List<String> getNameList(){
+        List<Field> fieldList = this.getDataReflectProcessor().getFieldList();
+        List<String> nameList = new ArrayList<>();
+        fieldList.forEach(field -> {
+            try {
+                nameList.add((String) field.get(this));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
+        return nameList;
     }
 
     /**
-     * Returns the name array of the user with the specified use cas.
+     * Returns the name array of the user with the specified type case.
      * @param caseType
      * @return
      */
     private String[] getNameArray(CaseType caseType){
-        return dataUtils.valuesCaseArray(this.getFullNamesAsMap(), caseType);
+        return this.getDataUtils().valuesCaseArray(this.getFullNamesAsMap(), caseType);
+    }
+
+    public List<String> getNameList(CaseType caseType){
+        return (ArrayList)Arrays.stream(this.getNameArray(caseType)).collect(Collectors.toList());
     }
 
     /**
      * Returns the keys of the map that is associated with the map of the names of the user.
      * @return String[] keys.
      */
-    private String[] getNameArrayKeys(){
-        if (this.otherName.equalsIgnoreCase(Name.NO_VALUE))
-            return new String[]{"firstName", "middleName", "lastName"};
-        return new String[]{"firstName", "middleName", "lastName", "otherName"};
+    private String[] getNameKeys(){
+        return this.getDataReflectProcessor().getNamesOfFields();
+    }
+
+    private List<String> getNameKeyList(){
+        return (ArrayList) Arrays.stream(this.getNameKeys()).collect(Collectors.toList());
     }
 
     /** PUBLIC METHODS */
@@ -139,7 +189,7 @@ public class Name implements Serializable
      * @return Map<String, String> map</String,>
      */
     public Map<String, String> getFullNamesAsMap(){
-        return this.dataUtils.createMap(this.getNameArrayKeys(), this.getNameArray());
+        return this.getDataUtils().createMap(this.getNameKeys(), this.getNameArray());
     }
 
     /**
@@ -149,7 +199,7 @@ public class Name implements Serializable
      * @return
      */
     public Map<String, String> getFullNamesAsMap(CaseType caseType){
-        return this.dataUtils.createMap(this.getNameArrayKeys(), this.getNameArray(caseType));
+        return this.getDataUtils().createMap(this.getNameKeys(), this.getNameArray(caseType));
     }
 
     /**
@@ -159,19 +209,35 @@ public class Name implements Serializable
     public String getFullName(){
         String conventionalName = this.firstName + " " + this.middleName + " " +
                                   this.lastName;
-        if (this.otherName.equalsIgnoreCase(Name.NO_VALUE)){
-            return conventionalName;
+        String twoName = this.firstName + " " + this.lastName;
+
+        if (this.otherName.equalsIgnoreCase(Name.NO_VALUE)
+            && this.middleName.equalsIgnoreCase(Name.NO_VALUE)){
+            return twoName;
         }
+        if (this.otherName.equalsIgnoreCase(Name.NO_VALUE)
+                && !this.middleName.equalsIgnoreCase(Name.NO_VALUE))
+            return conventionalName;
+
         return conventionalName + " " + this.otherName;
     }
 
     /**
-     * Returns the fullNames of the user with the specified delimiter.
+     * Returns the fullNames of the user with the specified delimiter as a string.
      * @param delimiter
      * @return String fullName
      */
     public String getFullName(String delimiter){
-        return this.dataUtils.concatWithSeparator(this.getFullNamesAsMap(), delimiter);
+        return this.getDataUtils().concatWithSeparator(this.getFullNamesAsMap(), delimiter);
+    }
+
+    /**
+     * Returns the fullNames of the user with the specified delimiter as a character.
+     * @param ch
+     * @return String fullName
+     */
+    public String getFullName(char ch){
+        return this.getDataUtils().concatWithSeparator(this.getFullNamesAsMap(), ch);
     }
 
     /** OVERRIDDEN METHODS */
@@ -190,17 +256,17 @@ public class Name implements Serializable
                 Objects.equals(middleName, name.middleName) &&
                 Objects.equals(lastName, name.lastName) &&
                 Objects.equals(otherName, name.otherName) &&
-                Objects.equals(dataUtils, name.dataUtils);
+                Objects.equals(getDataUtils(), name.getDataUtils());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, middleName, lastName, otherName, dataUtils);
+        return Objects.hash(firstName, middleName, lastName, otherName, this.getDataUtils());
     }
 
     /**
      * Returns a spring representation for the current Name aspect
-     * @return String oject.
+     * @return String object.
      */
     @Override
     public String toString() {

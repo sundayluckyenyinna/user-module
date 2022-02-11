@@ -1,4 +1,10 @@
-package com.springarr.user.data.personal;
+package com.springarr.user.data;
 
-public class ParentDetails {
+
+
+public class ParentDetails
+{
+    private Name name;
+    private com.springarr.user.data.Address address;
+
 }

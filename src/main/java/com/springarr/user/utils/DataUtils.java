@@ -17,17 +17,21 @@ public class DataUtils
      * Returns the concatenated string of the values of a map with the specified delimiter.
      * @param map
      * @param delimiter
-     * @return
+     * @return joinedString : String
      */
     public String concatWithSeparator(Map<String, String> map, String delimiter){
         StringBuilder builder = new StringBuilder();
         Set<String> keySet = map.keySet();
-        String[] keys = (ArrayUtils.from(new ArrayList<>(keySet)));
+        String[] keys = keySet.toArray(new String[0]);
         for (int i = 0; i < map.size() -1 ; i++){
             builder.append(map.get(keys[i]) + delimiter);
         }
         builder.append(map.get(keys[keys.length - 1]));
         return builder.toString();
+    }
+
+    public String concatWithSeparator(Map<String, String> map, char ch){
+        return this.concatWithSeparator(map, String.valueOf(ch));
     }
 
     public String[] valuesCaseArray(Map<String, String> map, CaseType caseType){
