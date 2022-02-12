@@ -38,7 +38,6 @@ public class Name extends SimpleDataContainer implements Serializable
      */
     private String otherName;
 
-    private Integer date;
     /**
      * A static property that indicates that an attribute is empty. This is to avoid the
      * presence of a 'null' value.
@@ -86,12 +85,11 @@ public class Name extends SimpleDataContainer implements Serializable
      * @param middleName : String
      * @param otherName : String
      */
-    public Name(String lastName, String firstName, String middleName, String otherName, Integer date){
+    public Name(String lastName, String firstName, String middleName, String otherName){
         this.lastName = lastName;
         this.firstName = firstName;
         this.middleName = middleName;
         this.otherName = otherName;
-        this.date = date;
     }
 
     /** GETTERS AND SETTERS OF PROPERTIES */
@@ -140,8 +138,6 @@ public class Name extends SimpleDataContainer implements Serializable
         this.otherName = otherName;
     }
 
-    public Integer getDate(){return date;}
-    public void setDate(Integer date){this.date = date;}
     /**
      * This is a private method that returns the array consisting of the names of the user.
      * @return String[] nameArray.

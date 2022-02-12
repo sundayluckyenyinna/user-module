@@ -19,8 +19,7 @@ public class PersonalDetails extends ObjectDataContainer implements Serializable
      * Creates an instance of this object with all sub objects initialized to defaults.
      */
     public PersonalDetails(){
-       this.name = new Name();
-       this.origin = new Origin();
+       super();
     }
 
     /**
