@@ -19,7 +19,7 @@ public class DataUtils
      * @param delimiter
      * @return joinedString : String
      */
-    public String concatWithSeparator(Map<String, String> map, String delimiter){
+    public static String concatWithSeparator(Map<String, String> map, String delimiter){
         StringBuilder builder = new StringBuilder();
         Set<String> keySet = map.keySet();
         String[] keys = keySet.toArray(new String[0]);
@@ -30,16 +30,16 @@ public class DataUtils
         return builder.toString();
     }
 
-    public String concatWithSeparator(Map<String, String> map, char ch){
-        return this.concatWithSeparator(map, String.valueOf(ch));
+    public static String concatWithSeparator(Map<String, String> map, char ch){
+        return concatWithSeparator(map, String.valueOf(ch));
     }
 
-    public String[] valuesCaseArray(Map<String, String> map, CaseType caseType){
+    public static String[] valuesCaseArray(Map<String, String> map, CaseType caseType){
         List<String> list = new ArrayList<>();
         switch (caseType){
             case ALL_LOWERCASE:{map.forEach((key, value) -> { list.add(value.toLowerCase());});break; }
             case ALL_UPPERCASE:{map.forEach((key, value) -> { list.add(value.toUpperCase());});break; }
-            case FIRST_UPPERCASE:{map.forEach((key, value) ->{ list.add(this.firstCharToUppercase(value));});break;}
+            case FIRST_UPPERCASE:{map.forEach((key, value) ->{ list.add(firstCharToUppercase(value));});break;}
             default: throw new InvalidCaseTypeException();
         }
         String[] array = new String[list.size()];
@@ -47,7 +47,7 @@ public class DataUtils
         return array;
     }
 
-    private String firstCharToUppercase(String string){
+    private static String firstCharToUppercase(String string){
         StringBuilder builder = new StringBuilder();
         builder.append(String.valueOf(string.charAt(0)).toUpperCase());
         for(int i = 1; i < string.length(); i++){
@@ -62,7 +62,7 @@ public class DataUtils
      * @param values
      * @return
      */
-    public Map<String, String> createMap(String[] keys, String[] values){
+    public static Map<String, String> createMap(String[] keys, String[] values){
         Map<String, String> map = new HashMap<>();
         if(keys.length != values.length) throw new ArraysLengthMismatchException();
         for (int i = 0; i < keys.length; i++){

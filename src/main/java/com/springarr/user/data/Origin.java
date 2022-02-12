@@ -1,15 +1,15 @@
 package com.springarr.user.data;
 
-import com.springarr.user.abstracts.DataContainer;
-import com.springarr.user.utils.DataReflectProcessor;
-import com.springarr.user.utils.DataUtils;
+import com.springarr.user.abstracts.SimpleDataContainer;
+import com.springarr.user.annotation.NoData;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * This class is a data class that stores and encapsulates the origin for the users of this application.
  */
-public class Origin extends DataContainer
+public class Origin extends SimpleDataContainer implements Serializable
 {
     /** A data field that holds the state of birth for this object. */
     private String stateOfBirth;
@@ -22,6 +22,9 @@ public class Origin extends DataContainer
 
     /** A data field that holds the gender for this object. */
     private String gender;
+
+    @NoData
+    private final static String NO_VALUE = "NULL";
 
     /**
      * Creates an instance of the Origin object with all fields values of strings initialized to "NULL"
@@ -128,17 +131,24 @@ public class Origin extends DataContainer
      * Returns a boolean if this object is equal to another object passed as parameter.
      * Note that two origin objects are equal if and only if their corresponding values of attributes
      * are each and all equal.
-     * @param o
-     * @return
+     * @param object : Origin
+     * @return boolean : boolean.
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Origin)) return false;
-        Origin origin = (Origin) o;
-        return Objects.equals(getStateOfBirth(), origin.getStateOfBirth()) && Objects.equals(getPlaceOfBirth(), origin.getPlaceOfBirth()) && Objects.equals(getCountryOfBirth(), origin.getCountryOfBirth()) && Objects.equals(getGender(), origin.getGender());
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof Origin)) return false;
+        Origin origin = (Origin) object;
+        return Objects.equals(getStateOfBirth(), origin.getStateOfBirth())
+                && Objects.equals(getPlaceOfBirth(), origin.getPlaceOfBirth())
+                && Objects.equals(getCountryOfBirth(), origin.getCountryOfBirth())
+                && Objects.equals(getGender(), origin.getGender());
     }
 
+    /**
+     * Returns the hashcode representation for this current object.
+     * @return hashcode : int.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(getStateOfBirth(), getPlaceOfBirth(), getCountryOfBirth(), getGender());

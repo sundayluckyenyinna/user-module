@@ -1,18 +1,17 @@
 package com.springarr.user.test;
 
-import com.springarr.user.data.Address;
-import com.springarr.user.data.Name;
-import com.springarr.user.data.Origin;
+import com.google.gson.Gson;
+import com.springarr.user.data.*;
+import com.springarr.user.enums.CaseType;
+import com.springarr.user.utils.DataReflectProcessor;
+
+import java.lang.reflect.Field;
 
 public class Test
 {
-    public static void main(String[] args) {
-//        Address address = new Address();
-//        System.out.println(address.toJSON());
-//
-        Name name = new Name("Sunday", "Enyinna", "Makinde");
-        Origin origin = new Origin();
-        System.out.println(origin.toString());
-
+    public static void main(String[] args) throws NoSuchFieldException {
+        Gson g = new Gson();
+        Name name = new Name();
+        System.out.println(new PersonalDetails().toJSON());
     }
 }

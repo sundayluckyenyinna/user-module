@@ -1,17 +1,14 @@
 package com.springarr.user.data;
 
-import com.springarr.user.abstracts.DataContainer;
-import com.springarr.user.annotation.NoData;
-import com.springarr.user.utils.DataUtils;
+import com.springarr.user.abstracts.SimpleDataContainer;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
  * A data class that holds all information about the Address object for the user.
  */
-public class Address extends DataContainer implements Serializable
+public class Address extends SimpleDataContainer implements Serializable
 {
     /** A data field to hold the home address for the user */
     private String homeAddress;

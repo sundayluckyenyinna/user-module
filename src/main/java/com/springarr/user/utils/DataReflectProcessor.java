@@ -1,14 +1,21 @@
 package com.springarr.user.utils;
 
 import com.google.gson.Gson;
+import com.springarr.user.abstracts.ObjectDataContainer;
+import com.springarr.user.abstracts.SimpleDataContainer;
 import com.springarr.user.annotation.NoData;
+import com.springarr.user.exception.IllegalTypeException;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
- * This class is responsible for the processing of data classes.
+ * This class is responsible for the processing of data classes. It should be noted that this class is extremely
+ * different from the DataUtil helper class in that it uses java reflection api to process the data and
+ * fields of the Object passed to it, whereas the DataUtil class only handles the low-level details of dealing
+ * with already generated data.
  */
 public class DataReflectProcessor
 {
@@ -18,20 +25,16 @@ public class DataReflectProcessor
     private final Gson jsonSerializer = new Gson();
 
     /**
-     * An instance of the object for which this DataReflectProcessor object will operate on. This implies
-     * all concrete, abstract or interface classes that will use this instance of this class must implement the Serializable
-     * interface.
+     * A static constant to indicate a string value of 'nothing'.
      */
-    private final Serializable object;
+    private final static String NO_VALUE = "NULL";
 
-    /**
-     * Creates a DataReflectProcessor instance for the serializable object. The serializable object must
-     * be passed as an argument to this instance.
-     * @param object : Serializable.
-     */
-    public DataReflectProcessor(Serializable object){
-        this.object = object;
-    }
+    private final static Integer NO_INTEGER =  0;
+
+    private final static Double NO_DOUBLE = 0.0;
+
+    private final static Float NO_FLOAT = 0.0f;
+
 
     /**
      * Returns the GSON instance that is used to serialize the passed serializable object to JSON.
@@ -45,8 +48,8 @@ public class DataReflectProcessor
      * Returns all declared fields of the serializable object in an array.
      * @return array : Field[]
      */
-    public Field[] getDataFields(){
-        Field[] allFields = this.object.getClass().getDeclaredFields();
+    public static Field[] getDataFields(Object object){
+        Field[] allFields = object.getClass().getDeclaredFields();
         List<Field> dataFields = new ArrayList<>();
         Arrays.stream(allFields).forEach(field -> {
             field.setAccessible(true);
@@ -60,8 +63,8 @@ public class DataReflectProcessor
      * Returns all declared fields of the serializable object in a List format.
      * @return list : List<Field>
      */
-    public List<Field> getFieldList(){
-        return Arrays.asList(this.getDataFields());
+    public static List<Field> getFieldList(Object object){
+        return Arrays.asList(getDataFields(object));
     }
 
     /**
@@ -69,9 +72,9 @@ public class DataReflectProcessor
      * and the value stored in the field at runtime is the value.
      * @return map : Map<String, String>
      */
-    public Map<String, String> getFieldMap(){
+    public Map<String, String> getFieldMap(Object object){
         Map<String, String> map = new HashMap<>();
-        this.getFieldList().stream().forEach(field -> {
+        getFieldList(object).stream().forEach(field -> {
             field.setAccessible(true);
             try {
                 map.put(field.getName(), (String)field.get(object));
@@ -86,19 +89,49 @@ public class DataReflectProcessor
      * Returns the JSON string for the serializable object in well format string format.
      * @return JSON : String.
      */
-    public String toJSONString(){
-        return this.jsonSerializer.toJson(this.getFieldMap());
+    public String toJSONString(Object object){
+        return this.jsonSerializer.toJson(this.getFieldMap(object));
     }
 
     /**
      * Returns the names of the declared fields for the serializable object in an array.
      * @return array : String[]
      */
-    public String[] getNamesOfFields(){
+    public static String[] getNamesOfFields(Object object){
         List<String> list = new ArrayList<>();
-        this.getFieldList().stream().forEach(field -> { field.setAccessible(true); list.add(field.getName());});
+        getFieldList(object).stream().forEach(field -> { field.setAccessible(true); list.add(field.getName());});
         return list.toArray(new String[0]);
     }
 
+    public static void initEmptyPrimitiveFields(SimpleDataContainer object){
+        getFieldList(object).forEach(field -> {
+            try {
+                if(field.getType().toString().contains("String"))
+                    field.set(object, DataReflectProcessor.NO_VALUE);
+                else if(field.getType().toString().contains("Integer"))
+                    field.set(object, DataReflectProcessor.NO_INTEGER);
+                else if(field.getType().toString().contains("Double"))
+                    field.set(object, DataReflectProcessor.NO_DOUBLE);
+                else if(field.getType().toString().contains("Float"))
+                    field.set(object, DataReflectProcessor.NO_FLOAT);
+                else
+                    throw new IllegalTypeException();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public static void initEmptyObjectField(ObjectDataContainer object){
+        getFieldList(object).forEach(field -> {
+            try {
+                field.set(object, field.getType().newInstance());
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
 }

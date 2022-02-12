@@ -1,8 +1,10 @@
 package com.springarr.user.data;
 
-import com.springarr.user.abstracts.DataContainer;
+import com.springarr.user.abstracts.SimpleDataContainer;
 import com.springarr.user.annotation.NoData;
 import com.springarr.user.enums.CaseType;
+import com.springarr.user.utils.DataReflectProcessor;
+import com.springarr.user.utils.DataUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
  * This class defines the objects or instances that will represent and hold the data for the name properties
  * of the users of this application.
  */
-public class Name extends DataContainer implements Serializable
+public class Name extends SimpleDataContainer implements Serializable
 {
     /**
      * The first name attribute for the typical user of the application.
@@ -36,8 +38,9 @@ public class Name extends DataContainer implements Serializable
      */
     private String otherName;
 
+    private Integer date;
     /**
-     * A static property that indicates that an attribute is empty. This is avoid the
+     * A static property that indicates that an attribute is empty. This is to avoid the
      * presence of a 'null' value.
      */
     @NoData
@@ -83,11 +86,12 @@ public class Name extends DataContainer implements Serializable
      * @param middleName : String
      * @param otherName : String
      */
-    public Name(String lastName, String firstName, String middleName, String otherName){
+    public Name(String lastName, String firstName, String middleName, String otherName, Integer date){
         this.lastName = lastName;
         this.firstName = firstName;
         this.middleName = middleName;
         this.otherName = otherName;
+        this.date = date;
     }
 
     /** GETTERS AND SETTERS OF PROPERTIES */
@@ -136,6 +140,8 @@ public class Name extends DataContainer implements Serializable
         this.otherName = otherName;
     }
 
+    public Integer getDate(){return date;}
+    public void setDate(Integer date){this.date = date;}
     /**
      * This is a private method that returns the array consisting of the names of the user.
      * @return String[] nameArray.
@@ -145,7 +151,7 @@ public class Name extends DataContainer implements Serializable
     }
 
     private List<String> getNameList(){
-        List<Field> fieldList = this.getDataReflectProcessor().getFieldList();
+        List<Field> fieldList = DataReflectProcessor.getFieldList(this);
         List<String> nameList = new ArrayList<>();
         fieldList.forEach(field -> {
             try {
@@ -163,7 +169,7 @@ public class Name extends DataContainer implements Serializable
      * @return
      */
     private String[] getNameArray(CaseType caseType){
-        return this.getDataUtils().valuesCaseArray(this.getFullNamesAsMap(), caseType);
+        return DataUtils.valuesCaseArray(this.getFullNamesAsMap(), caseType);
     }
 
     public List<String> getNameList(CaseType caseType){
@@ -175,7 +181,7 @@ public class Name extends DataContainer implements Serializable
      * @return String[] keys.
      */
     private String[] getNameKeys(){
-        return this.getDataReflectProcessor().getNamesOfFields();
+        return DataReflectProcessor.getNamesOfFields(this);
     }
 
     private List<String> getNameKeyList(){
@@ -189,7 +195,7 @@ public class Name extends DataContainer implements Serializable
      * @return Map<String, String> map</String,>
      */
     public Map<String, String> getFullNamesAsMap(){
-        return this.getDataUtils().createMap(this.getNameKeys(), this.getNameArray());
+        return DataUtils.createMap(this.getNameKeys(), this.getNameArray());
     }
 
     /**
@@ -199,7 +205,7 @@ public class Name extends DataContainer implements Serializable
      * @return
      */
     public Map<String, String> getFullNamesAsMap(CaseType caseType){
-        return this.getDataUtils().createMap(this.getNameKeys(), this.getNameArray(caseType));
+        return DataUtils.createMap(this.getNameKeys(), this.getNameArray(caseType));
     }
 
     /**
@@ -228,40 +234,45 @@ public class Name extends DataContainer implements Serializable
      * @return String fullName
      */
     public String getFullName(String delimiter){
-        return this.getDataUtils().concatWithSeparator(this.getFullNamesAsMap(), delimiter);
+        return DataUtils.concatWithSeparator(this.getFullNamesAsMap(), delimiter);
     }
 
     /**
      * Returns the fullNames of the user with the specified delimiter as a character.
-     * @param ch
+     * @param ch : Character
      * @return String fullName
      */
     public String getFullName(char ch){
-        return this.getDataUtils().concatWithSeparator(this.getFullNamesAsMap(), ch);
+        return DataUtils.concatWithSeparator(this.getFullNamesAsMap(), ch);
     }
 
     /** OVERRIDDEN METHODS */
 
     /**
-     * Returns true if  the and only if
-     * @param o
-     * @return
+     * Returns a boolean if this object is equal to another object passed as parameter.
+     * Note that two origin objects are equal if and only if their corresponding values of attributes
+     * are each and all equal.
+     * @param object : Origin
+     * @return boolean : boolean.
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Name name = (Name) o;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Name name = (Name) object;
         return Objects.equals(firstName, name.firstName) &&
                 Objects.equals(middleName, name.middleName) &&
                 Objects.equals(lastName, name.lastName) &&
-                Objects.equals(otherName, name.otherName) &&
-                Objects.equals(getDataUtils(), name.getDataUtils());
+                Objects.equals(otherName, name.otherName);
     }
 
+    /**
+     * Returns the hashcode representation for this current object.
+     * @return hashcode : int.
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, middleName, lastName, otherName, this.getDataUtils());
+        return Objects.hash(firstName, middleName, lastName, otherName);
     }
 
     /**

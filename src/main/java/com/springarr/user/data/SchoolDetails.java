@@ -1,4 +1,6 @@
 package com.springarr.user.data;
 
-public class SchoolDetails {
+public class SchoolDetails
+{
+
 }
